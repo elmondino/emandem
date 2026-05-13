@@ -42,10 +42,13 @@ export default function StoreClient({ initialProducts, locale, localeKey }: Prop
       .finally(() => setLoadingMore(false));
   }, []);
 
-  const getProductName = (product: Product) => product.name[locale.region];
+  const getProductName = (product: Product) =>
+    product.name[locale.region as keyof typeof product.name] ?? product.name.uk;
 
   const getProductPrice = (product: Product) => {
-    const amount = locale.currency === 'GBP' ? product.price.gbp : product.price.usd;
+    // Map ISO currency code to API price field; extend here when new currencies are added to the API
+    const byCode: Record<string, number> = { GBP: product.price.gbp, USD: product.price.usd };
+    const amount = byCode[locale.currency] ?? 0;
     return { raw: amount, formatted: formatPrice(amount, locale) };
   };
 
@@ -70,7 +73,7 @@ export default function StoreClient({ initialProducts, locale, localeKey }: Prop
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          {locale.label === 'United Kingdom' ? '🇬🇧' : '🇺🇸'} {locale.label} Store
+          {locale.flag} {locale.label} Store
         </h1>
         <p className="text-gray-500 mb-8 text-sm">Click a product to add it to your basket.</p>
 
@@ -104,7 +107,7 @@ export default function StoreClient({ initialProducts, locale, localeKey }: Prop
         {/* Visually hidden live region announces basket additions to screen readers */}
         <div aria-live="polite" className="sr-only">
           {addedId !== null
-            ? `${products.find(p => p.id === addedId)?.name[locale.region] ?? 'Item'} added to basket`
+            ? `${products.find(p => p.id === addedId)?.name[locale.region as keyof typeof products[0]['name']] ?? 'Item'} added to basket`
             : ''}
         </div>
 

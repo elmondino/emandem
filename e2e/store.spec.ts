@@ -100,8 +100,8 @@ test('placing an order shows confirmation and clears basket', async ({ page }) =
 test('switching locale from UK to US updates prices and keeps basket', async ({ page }) => {
   await page.goto('/uk');
   await page.getByRole('button', { name: /add .+ to basket/i }).first().click();
-  // Switch to US via the locale pill
-  await page.getByRole('link', { name: /switch to united states/i }).click();
+  // Switch to US via the locale pill (use getByLabel to avoid fragility from role overrides)
+  await page.getByLabel(/switch to united states/i).click();
   await expect(page).toHaveURL(/\/us/);
   // Basket count still shows 1
   await expect(page.getByRole('button', { name: /open basket, 1 item/i })).toBeVisible();

@@ -23,7 +23,7 @@ export default function Navbar({ localeKey, onBasketClick }: Props) {
         <div className="flex items-center gap-3">
           {/* Locale toggle pill */}
           <div className="flex items-center bg-gray-100 rounded-full p-1 gap-1" role="group" aria-label="Select region">
-            {(['uk', 'us'] as Region[]).map(loc => (
+            {(Object.keys(locales) as Region[]).map(loc => (
               <Link
                 key={loc}
                 href={`/${loc}`}
@@ -39,7 +39,7 @@ export default function Navbar({ localeKey, onBasketClick }: Props) {
                     : 'text-gray-500 hover:text-gray-800'
                 }`}
               >
-                {loc === 'uk' ? '🇬🇧 UK' : '🇺🇸 US'}
+                {locales[loc].flag} {loc.toUpperCase()}
               </Link>
             ))}
           </div>
