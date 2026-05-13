@@ -12,7 +12,6 @@ interface Props {
 export default function Navbar({ localeKey, onBasketClick }: Props) {
   const { items } = useBasket();
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-  const otherLocale: Region = localeKey === 'uk' ? 'us' : 'uk';
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
@@ -22,13 +21,24 @@ export default function Navbar({ localeKey, onBasketClick }: Props) {
         </Link>
 
         <div className="flex items-center gap-3">
-          <Link
-            href={`/${otherLocale}`}
-            className="text-sm font-medium text-gray-500 hover:text-gray-900 border border-gray-200 rounded-full px-3 py-1 transition-colors"
-            aria-label={`Switch to ${locales[otherLocale].label}`}
-          >
-            {otherLocale === 'uk' ? '🇬🇧 UK' : '🇺🇸 US'}
-          </Link>
+          {/* Locale toggle pill */}
+          <div className="flex items-center bg-gray-100 rounded-full p-1 gap-1" role="group" aria-label="Select region">
+            {(['uk', 'us'] as Region[]).map(loc => (
+              <Link
+                key={loc}
+                href={`/${loc}`}
+                className={`text-sm font-medium px-3 py-1 rounded-full transition-colors ${
+                  localeKey === loc
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-800'
+                }`}
+                aria-current={localeKey === loc ? 'page' : undefined}
+                aria-label={`Switch to ${locales[loc].label}`}
+              >
+                {loc === 'uk' ? '🇬🇧 UK' : '🇺🇸 US'}
+              </Link>
+            ))}
+          </div>
 
           <button
             onClick={onBasketClick}
