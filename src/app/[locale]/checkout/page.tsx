@@ -3,11 +3,12 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useBasket } from '@/context/BasketContext';
-import { isValidLocale, locales, formatPrice } from '@/lib/locale';
+import { locales, formatPrice } from '@/lib/locale';
 
 export default function CheckoutPage({ params }: { params: { locale: string } }) {
   const { items, updateQuantity, removeFromCart, clearBasket } = useBasket();
-  const locale = isValidLocale(params.locale) ? locales[params.locale] : locales.uk;
+  // Locale is guaranteed valid by [locale]/layout.tsx which calls notFound() for invalid values
+  const locale = locales[params.locale as keyof typeof locales] ?? locales.uk;
   const [ordered, setOrdered] = useState(false);
   // Both prices are stored on every item - always display in the current locale's currency
   const getPrice = (item: { priceGBP: number; priceUSD: number }) =>

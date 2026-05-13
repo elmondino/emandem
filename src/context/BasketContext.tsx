@@ -28,7 +28,21 @@ export function BasketProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const stored = localStorage.getItem('basket');
-      if (stored) setItems(JSON.parse(stored));
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        // Validate shape to discard data from old schema versions
+        const valid = Array.isArray(parsed)
+          ? parsed.filter(
+              (item): item is BasketItem =>
+                typeof item?.id === 'number' &&
+                typeof item?.name === 'string' &&
+                typeof item?.priceGBP === 'number' &&
+                typeof item?.priceUSD === 'number' &&
+                typeof item?.quantity === 'number'
+            )
+          : [];
+        if (valid.length > 0) setItems(valid);
+      }
     } catch {}
     setHydrated(true);
   }, []);
