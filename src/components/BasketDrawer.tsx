@@ -15,7 +15,7 @@ interface Props {
 export default function BasketDrawer({ open, onClose, locale, localeKey }: Props) {
   const router = useRouter();
   const { items, updateQuantity, removeFromCart } = useBasket();
-  const drawerRef = useRef<HTMLElement>(null);
+  const drawerRef = useRef<HTMLDivElement>(null);
 
   // Prevent keyboard focus reaching hidden drawer
   useEffect(() => {
@@ -48,7 +48,7 @@ export default function BasketDrawer({ open, onClose, locale, localeKey }: Props
 
       {/* Drawer panel */}
       <div
-        ref={drawerRef as React.RefObject<HTMLDivElement>}
+        ref={drawerRef}
         role="dialog"
         aria-label="Shopping basket"
         aria-modal="true"

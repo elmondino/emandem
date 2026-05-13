@@ -104,7 +104,8 @@ export default function CheckoutPage({ params }: { params: { locale: string } })
                     <span className="w-6 text-center font-medium tabular-nums">{item.quantity}</span>
                     <button
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors font-bold"
+                      disabled={item.quantity >= 10000}
+                      className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors font-bold disabled:opacity-40 disabled:cursor-not-allowed"
                       aria-label={`Increase quantity of ${item.name}`}
                     >
                       +
