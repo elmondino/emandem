@@ -52,7 +52,10 @@ export default function StoreClient({ initialProducts, locale, localeKey }: Prop
             className={styles.basket}
             onClick={() => router.push(`/${localeKey}/checkout`)}
           >
-            Basket: {items.length} {items.length === 1 ? 'item' : 'items'}
+            {(() => {
+              const total = items.reduce((sum, item) => sum + item.quantity, 0);
+              return `Basket: ${total} ${total === 1 ? 'item' : 'items'}`;
+            })()}
           </button>
           {items.map(item => (
             <div key={item.id}>{item.name} count: {item.quantity}</div>

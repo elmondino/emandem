@@ -73,6 +73,6 @@ describe('Home', () => {
             name: /Basket:/i,
         });
 
-        expect(basketButton).toHaveTextContent(/Basket: 2 items$/);
+        expect(basketButton).toHaveTextContent(/Basket: 3 items$/);
     });
 });
