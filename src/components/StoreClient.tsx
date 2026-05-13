@@ -19,7 +19,7 @@ export default function StoreClient({ initialProducts, locale, localeKey }: Prop
   const [products, setProducts] = useState<Product[]>(initialProducts);
 
   useEffect(() => {
-    fetch('https://v0-api-endpoint-request.vercel.app/api/more-products')
+    fetch('/api/more-products')
       .then(r => r.json())
       .then(data => {
         if (data.success && Array.isArray(data.products)) {
