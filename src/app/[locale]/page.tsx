@@ -13,7 +13,7 @@ export default async function LocalePage({
   params: { locale: string };
 }) {
   // Locale validation is handled by [locale]/layout.tsx before this page renders
-  const locale = locales[params.locale];
+  const locale = locales[params.locale as Region];
   let products: Awaited<ReturnType<typeof getProducts>> = [];
   try {
     products = await getProducts();

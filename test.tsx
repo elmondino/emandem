@@ -19,6 +19,8 @@ const mockProducts: Product[] = [
 ];
 
 beforeEach(() => {
+    // Clear persisted basket between tests to prevent state leaking across test runs.
+    localStorage.clear();
     // Return a never-resolving promise so the deferred more-products fetch
     // does not trigger state updates during synchronous test assertions.
     global.fetch = jest.fn().mockReturnValue(new Promise(() => {})) as jest.Mock;

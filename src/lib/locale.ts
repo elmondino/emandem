@@ -7,7 +7,7 @@ export interface LocaleConfig {
   label: string;
 }
 
-export const locales: Record<string, LocaleConfig> = {
+export const locales: Record<Region, LocaleConfig> = {
   uk: { currency: 'GBP', currencyLocale: 'en-GB', region: 'uk', label: 'United Kingdom' },
   us: { currency: 'USD', currencyLocale: 'en-US', region: 'us', label: 'United States' },
 };

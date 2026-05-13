@@ -1,20 +1,54 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useBasket } from '@/context/BasketContext';
 import { isValidLocale, locales, formatPrice } from '@/lib/locale';
 
 export default function CheckoutPage({ params }: { params: { locale: string } }) {
-  const { items, updateQuantity, removeFromCart } = useBasket();
+  const { items, updateQuantity, removeFromCart, clearBasket } = useBasket();
   const locale = isValidLocale(params.locale) ? locales[params.locale] : locales.uk;
-  // Per-item: use the currency the item was added in; grand total uses current locale
-  const fmtItem = (amount: number, currency: 'GBP' | 'USD') => {
-    const cfg = Object.values(locales).find(l => l.currency === currency) ?? locale;
-    return formatPrice(amount, cfg);
-  };
+  const [ordered, setOrdered] = useState(false);
+  // Both prices are stored on every item - always display in the current locale's currency
+  const getPrice = (item: { priceGBP: number; priceUSD: number }) =>
+    locale.currency === 'GBP' ? item.priceGBP : item.priceUSD;
   const fmt = (amount: number) => formatPrice(amount, locale);
-  const grandTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const grandTotal = items.reduce((sum, item) => sum + getPrice(item) * item.quantity, 0);
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  const handlePlaceOrder = () => {
+    clearBasket();
+    setOrdered(true);
+  };
+
+  if (ordered) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <header className="bg-white border-b border-gray-200 shadow-sm">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 h-16 flex items-center">
+            <h1 className="text-xl font-bold text-gray-900">Order confirmed</h1>
+          </div>
+        </header>
+        <main className="max-w-3xl mx-auto px-4 sm:px-6 py-20 text-center">
+          <div className="bg-white rounded-2xl border border-gray-200 p-16 shadow-sm">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Order placed!</h2>
+            <p className="text-gray-500 mb-8">Thank you for your order. You will receive a confirmation email shortly.</p>
+            <Link
+              href={`/${params.locale}`}
+              className="inline-block bg-indigo-600 text-white font-semibold px-8 py-3 rounded-full hover:bg-indigo-700 transition-colors"
+            >
+              Continue shopping
+            </Link>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -56,7 +90,7 @@ export default function CheckoutPage({ params }: { params: { locale: string } })
                 <li key={item.id} className="px-6 py-4 flex items-center gap-4">
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-gray-900 truncate">{item.name}</p>
-                    <p className="text-sm text-gray-500">{fmtItem(item.price, item.currency)} each</p>
+                    <p className="text-sm text-gray-500">{fmt(getPrice(item))} each</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -76,7 +110,7 @@ export default function CheckoutPage({ params }: { params: { locale: string } })
                     </button>
                   </div>
                   <div className="text-right min-w-20">
-                    <p className="font-semibold text-gray-900">{fmtItem(item.price * item.quantity, item.currency)}</p>
+                    <p className="font-semibold text-gray-900">{fmt(getPrice(item) * item.quantity)}</p>
                   </div>
                   <button
                     onClick={() => removeFromCart(item.id)}
@@ -102,6 +136,7 @@ export default function CheckoutPage({ params }: { params: { locale: string } })
                 <span>{fmt(grandTotal)}</span>
               </div>
               <button
+                onClick={handlePlaceOrder}
                 className="w-full bg-indigo-600 text-white font-semibold py-3 rounded-xl hover:bg-indigo-700 transition-colors"
               >
                 Place order

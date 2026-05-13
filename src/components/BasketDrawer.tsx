@@ -3,7 +3,7 @@
 import { useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useBasket } from '@/context/BasketContext';
-import { LocaleConfig, formatPrice, Region, locales } from '@/lib/locale';
+import { LocaleConfig, formatPrice, Region } from '@/lib/locale';
 
 interface Props {
   open: boolean;
@@ -28,14 +28,11 @@ export default function BasketDrawer({ open, onClose, locale, localeKey }: Props
     }
   }, [open]);
 
-  // Format per-item using the currency the item was added in, not the current locale
-  const fmtItem = (amount: number, currency: 'GBP' | 'USD') => {
-    const cfg = Object.values(locales).find(l => l.currency === currency) ?? locale;
-    return formatPrice(amount, cfg);
-  };
-  // Grand total uses current locale
+  // Both prices are stored on every item - always display in the current locale's currency
+  const getPrice = (item: { priceGBP: number; priceUSD: number }) =>
+    locale.currency === 'GBP' ? item.priceGBP : item.priceUSD;
   const fmt = (amount: number) => formatPrice(amount, locale);
-  const grandTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const grandTotal = items.reduce((sum, item) => sum + getPrice(item) * item.quantity, 0);
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
@@ -88,7 +85,7 @@ export default function BasketDrawer({ open, onClose, locale, localeKey }: Props
                 <li key={item.id} className="py-4 flex items-center gap-4">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">{item.name}</p>
-                    <p className="text-sm text-gray-500">{fmtItem(item.price, item.currency)} each</p>
+                    <p className="text-sm text-gray-500">{fmt(getPrice(item))} each</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -108,7 +105,7 @@ export default function BasketDrawer({ open, onClose, locale, localeKey }: Props
                     </button>
                   </div>
                   <div className="text-right min-w-16">
-                    <p className="text-sm font-semibold text-gray-900">{fmtItem(item.price * item.quantity, item.currency)}</p>
+                    <p className="text-sm font-semibold text-gray-900">{fmt(getPrice(item) * item.quantity)}</p>
                   </div>
                   <button
                     onClick={() => removeFromCart(item.id)}

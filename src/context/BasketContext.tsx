@@ -1,28 +1,44 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export interface BasketItem {
   id: number;
   name: string;
-  price: number;
-  currency: 'GBP' | 'USD';
+  priceGBP: number;
+  priceUSD: number;
   quantity: number;
 }
 
 interface BasketContextValue {
   items: BasketItem[];
-  addToCart: (product: { id: number; name: string; price: number; currency: 'GBP' | 'USD' }) => void;
+  addToCart: (product: { id: number; name: string; priceGBP: number; priceUSD: number }) => void;
   updateQuantity: (id: number, quantity: number) => void;
   removeFromCart: (id: number) => void;
+  clearBasket: () => void;
 }
 
 const BasketContext = createContext<BasketContextValue | null>(null);
 
 export function BasketProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<BasketItem[]>([]);
+  const [hydrated, setHydrated] = useState(false);
 
-  const addToCart = (product: { id: number; name: string; price: number; currency: 'GBP' | 'USD' }) => {
+  // Restore persisted basket from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('basket');
+      if (stored) setItems(JSON.parse(stored));
+    } catch {}
+    setHydrated(true);
+  }, []);
+
+  // Persist basket to localStorage after hydration
+  useEffect(() => {
+    if (hydrated) localStorage.setItem('basket', JSON.stringify(items));
+  }, [items, hydrated]);
+
+  const addToCart = (product: { id: number; name: string; priceGBP: number; priceUSD: number }) => {
     setItems(prev => {
       const existing = prev.find(item => item.id === product.id);
       if (existing) {
@@ -47,8 +63,10 @@ export function BasketProvider({ children }: { children: ReactNode }) {
     setItems(prev => prev.filter(item => item.id !== id));
   };
 
+  const clearBasket = () => setItems([]);
+
   return (
-    <BasketContext.Provider value={{ items, addToCart, updateQuantity, removeFromCart }}>
+    <BasketContext.Provider value={{ items, addToCart, updateQuantity, removeFromCart, clearBasket }}>
       {children}
     </BasketContext.Provider>
   );

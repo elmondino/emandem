@@ -14,7 +14,7 @@ interface Props {
 }
 
 export default function StoreClient({ initialProducts, locale, localeKey }: Props) {
-  const { addToCart } = useBasket();
+  const { addToCart, items: basketItems } = useBasket();
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [loadingMore, setLoadingMore] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -49,9 +49,11 @@ export default function StoreClient({ initialProducts, locale, localeKey }: Prop
     return { raw: amount, formatted: formatPrice(amount, locale) };
   };
 
+  const getBasketQuantity = (productId: number) =>
+    basketItems.find(i => i.id === productId)?.quantity ?? 0;
+
   const handleAddToCart = (product: Product) => {
-    const { raw } = getProductPrice(product);
-    addToCart({ id: product.id, name: getProductName(product), price: raw, currency: locale.currency });
+    addToCart({ id: product.id, name: getProductName(product), priceGBP: product.price.gbp, priceUSD: product.price.usd });
     if (addedTimerRef.current) clearTimeout(addedTimerRef.current);
     setAddedId(product.id);
     addedTimerRef.current = setTimeout(() => setAddedId(null), 1200);
@@ -83,26 +85,52 @@ export default function StoreClient({ initialProducts, locale, localeKey }: Prop
           </div>
         )}
 
+        {/* Visually hidden live region announces basket additions to screen readers */}
+        <div aria-live="polite" className="sr-only">
+          {addedId !== null
+            ? `${products.find(p => p.id === addedId)?.name[locale.region] ?? 'Item'} added to basket`
+            : ''}
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {products.map(product => {
             const { formatted } = getProductPrice(product);
             const added = addedId === product.id;
+            const inStock = product.stock > 0;
+            const atLimit = getBasketQuantity(product.id) >= product.stock;
+            const canAdd = inStock && !atLimit;
+            const badgeLabel = !inStock ? 'Out of stock' : atLimit ? 'Max qty' : added ? 'Added!' : '+ Add';
             return (
               <button
                 key={product.id}
-                onClick={() => handleAddToCart(product)}
-                aria-label={`Add ${getProductName(product)} to basket`}
-                className={`group text-left bg-white rounded-2xl border transition-all duration-150 p-5 flex flex-col gap-2 shadow-sm hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${added ? 'border-indigo-400 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300'}`}
+                onClick={() => { if (canAdd) handleAddToCart(product); }}
+                disabled={!canAdd}
+                aria-label={canAdd ? `Add ${getProductName(product)} to basket` : `${getProductName(product)} - ${badgeLabel}`}
+                className={`group text-left bg-white rounded-2xl border transition-all duration-150 p-5 flex flex-col gap-2 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+                  !canAdd
+                    ? 'opacity-60 cursor-not-allowed border-gray-200'
+                    : added
+                    ? 'border-indigo-400 bg-indigo-50 hover:shadow-md'
+                    : 'border-gray-200 hover:border-indigo-300 hover:shadow-md'
+                }`}
               >
                 <div className="flex-1">
-                  <p className="font-semibold text-gray-900 text-base leading-snug group-hover:text-indigo-700 transition-colors">
+                  <p className={`font-semibold text-base leading-snug transition-colors ${
+                    !canAdd ? 'text-gray-400' : 'text-gray-900 group-hover:text-indigo-700'
+                  }`}>
                     {getProductName(product)}
                   </p>
                 </div>
                 <div className="flex items-center justify-between mt-2">
                   <span className="text-lg font-bold text-gray-900">{formatted}</span>
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full transition-all duration-150 ${added ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-500 group-hover:bg-indigo-100 group-hover:text-indigo-700'}`}>
-                    {added ? 'Added!' : '+ Add'}
+                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full transition-all duration-150 ${
+                    !canAdd
+                      ? 'bg-gray-100 text-gray-400'
+                      : added
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-gray-100 text-gray-500 group-hover:bg-indigo-100 group-hover:text-indigo-700'
+                  }`}>
+                    {badgeLabel}
                   </span>
                 </div>
               </button>
