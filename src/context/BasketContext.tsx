@@ -4,7 +4,8 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 
 export interface BasketItem {
   id: number;
-  name: string;
+  nameUK: string;
+  nameUS: string;
   priceGBP: number;
   priceUSD: number;
   quantity: number;
@@ -12,7 +13,7 @@ export interface BasketItem {
 
 interface BasketContextValue {
   items: BasketItem[];
-  addToCart: (product: { id: number; name: string; priceGBP: number; priceUSD: number }) => void;
+  addToCart: (product: { id: number; nameUK: string; nameUS: string; priceGBP: number; priceUSD: number }) => void;
   updateQuantity: (id: number, quantity: number) => void;
   removeFromCart: (id: number) => void;
   clearBasket: () => void;
@@ -35,7 +36,8 @@ export function BasketProvider({ children }: { children: ReactNode }) {
           ? parsed.filter(
               (item): item is BasketItem =>
                 typeof item?.id === 'number' &&
-                typeof item?.name === 'string' &&
+                typeof item?.nameUK === 'string' &&
+                typeof item?.nameUS === 'string' &&
                 typeof item?.priceGBP === 'number' &&
                 typeof item?.priceUSD === 'number' &&
                 typeof item?.quantity === 'number'
@@ -52,7 +54,7 @@ export function BasketProvider({ children }: { children: ReactNode }) {
     if (hydrated) localStorage.setItem('basket', JSON.stringify(items));
   }, [items, hydrated]);
 
-  const addToCart = (product: { id: number; name: string; priceGBP: number; priceUSD: number }) => {
+  const addToCart = (product: { id: number; nameUK: string; nameUS: string; priceGBP: number; priceUSD: number }) => {
     setItems(prev => {
       const existing = prev.find(item => item.id === product.id);
       if (existing) {

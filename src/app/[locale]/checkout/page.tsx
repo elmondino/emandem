@@ -14,6 +14,8 @@ export default function CheckoutPage({ params }: { params: { locale: string } })
   const getPrice = (item: { priceGBP: number; priceUSD: number }) =>
     locale.currency === 'GBP' ? item.priceGBP : item.priceUSD;
   const fmt = (amount: number) => formatPrice(amount, locale);
+  const getItemName = (item: { nameUK: string; nameUS: string }) =>
+    params.locale === 'uk' ? item.nameUK : item.nameUS;
   const grandTotal = items.reduce((sum, item) => sum + getPrice(item) * item.quantity, 0);
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -90,14 +92,14 @@ export default function CheckoutPage({ params }: { params: { locale: string } })
               {items.map(item => (
                 <li key={item.id} className="px-6 py-4 flex items-center gap-4">
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 truncate">{item.name}</p>
+                    <p className="font-medium text-gray-900 truncate">{getItemName(item)}</p>
                     <p className="text-sm text-gray-500">{fmt(getPrice(item))} each</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => updateQuantity(item.id, item.quantity - 1)}
                       className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors font-bold"
-                      aria-label={`Decrease quantity of ${item.name}`}
+                      aria-label={`Decrease quantity of ${getItemName(item)}`}
                     >
                       -
                     </button>
@@ -106,7 +108,7 @@ export default function CheckoutPage({ params }: { params: { locale: string } })
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
                       disabled={item.quantity >= 10000}
                       className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors font-bold disabled:opacity-40 disabled:cursor-not-allowed"
-                      aria-label={`Increase quantity of ${item.name}`}
+                      aria-label={`Increase quantity of ${getItemName(item)}`}
                     >
                       +
                     </button>
@@ -117,7 +119,7 @@ export default function CheckoutPage({ params }: { params: { locale: string } })
                   <button
                     onClick={() => removeFromCart(item.id)}
                     className="p-2 rounded-full hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
-                    aria-label={`Remove ${item.name}`}
+                    aria-label={`Remove ${getItemName(item)}`}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

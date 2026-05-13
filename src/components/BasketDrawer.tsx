@@ -32,6 +32,8 @@ export default function BasketDrawer({ open, onClose, locale, localeKey }: Props
   const getPrice = (item: { priceGBP: number; priceUSD: number }) =>
     locale.currency === 'GBP' ? item.priceGBP : item.priceUSD;
   const fmt = (amount: number) => formatPrice(amount, locale);
+  const getItemName = (item: { nameUK: string; nameUS: string }) =>
+    localeKey === 'uk' ? item.nameUK : item.nameUS;
   const grandTotal = items.reduce((sum, item) => sum + getPrice(item) * item.quantity, 0);
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -84,14 +86,14 @@ export default function BasketDrawer({ open, onClose, locale, localeKey }: Props
               {items.map(item => (
                 <li key={item.id} className="py-4 flex items-center gap-4">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{item.name}</p>
+                    <p className="text-sm font-medium text-gray-900 truncate">{getItemName(item)}</p>
                     <p className="text-sm text-gray-500">{fmt(getPrice(item))} each</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => updateQuantity(item.id, item.quantity - 1)}
                       className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors text-sm font-bold"
-                      aria-label={`Decrease quantity of ${item.name}`}
+                      aria-label={`Decrease quantity of ${getItemName(item)}`}
                     >
                       -
                     </button>
@@ -99,7 +101,7 @@ export default function BasketDrawer({ open, onClose, locale, localeKey }: Props
                     <button
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
                       className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors text-sm font-bold"
-                      aria-label={`Increase quantity of ${item.name}`}
+                      aria-label={`Increase quantity of ${getItemName(item)}`}
                     >
                       +
                     </button>
@@ -110,7 +112,7 @@ export default function BasketDrawer({ open, onClose, locale, localeKey }: Props
                   <button
                     onClick={() => removeFromCart(item.id)}
                     className="p-1.5 rounded-full hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
-                    aria-label={`Remove ${item.name} from basket`}
+                    aria-label={`Remove ${getItemName(item)} from basket`}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
