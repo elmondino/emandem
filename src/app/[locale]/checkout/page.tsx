@@ -3,10 +3,14 @@
 import { useBasket } from '@/context/BasketContext';
 import styles from '@/app/page.module.css';
 import Link from 'next/link';
+import { isValidLocale, locales, formatPrice } from '@/lib/locale';
 
 export default function CheckoutPage({ params }: { params: { locale: string } }) {
   const { items } = useBasket();
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  const locale = isValidLocale(params.locale) ? locales[params.locale] : locales.uk;
+  const fmt = (amount: number) => formatPrice(amount, locale);
+  const grandTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
     <main className={styles.main}>
@@ -31,8 +35,8 @@ export default function CheckoutPage({ params }: { params: { locale: string } })
                 <tr key={item.id}>
                   <td>{item.name}</td>
                   <td>{item.quantity}</td>
-                  <td>{item.price.toFixed(2)}</td>
-                  <td>{(item.price * item.quantity).toFixed(2)}</td>
+                  <td>{fmt(item.price)}</td>
+                  <td>{fmt(item.price * item.quantity)}</td>
                 </tr>
               ))}
             </tbody>
@@ -41,7 +45,7 @@ export default function CheckoutPage({ params }: { params: { locale: string } })
                 <td><strong>Total items</strong></td>
                 <td><strong>{totalItems}</strong></td>
                 <td></td>
-                <td><strong>{items.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}</strong></td>
+                <td><strong>{fmt(grandTotal)}</strong></td>
               </tr>
             </tfoot>
           </table>
