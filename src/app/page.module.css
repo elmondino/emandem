@@ -97,7 +97,7 @@
   }
 
   .grid {
-    /* TODO Look up how to make a single column list*/
+    grid-template-columns: 1fr;
     margin-bottom: 120px;
     max-width: 320px;
     text-align: center;
