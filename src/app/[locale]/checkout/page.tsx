@@ -11,11 +11,11 @@ export default function CheckoutPage({ params }: { params: { locale: string } })
   const locale = locales[params.locale as keyof typeof locales] ?? locales.uk;
   const [ordered, setOrdered] = useState(false);
   // Both prices are stored on every item - always display in the current locale's currency
-  const getPrice = (item: { priceGBP: number; priceUSD: number }) =>
-    locale.currency === 'GBP' ? item.priceGBP : item.priceUSD;
+  const getPrice = (item: { prices: Record<string, number> }) =>
+    item.prices[locale.currency] ?? 0;
   const fmt = (amount: number) => formatPrice(amount, locale);
-  const getItemName = (item: { nameUK: string; nameUS: string }) =>
-    params.locale === 'uk' ? item.nameUK : item.nameUS;
+  const getItemName = (item: { names: Record<string, string> }) =>
+    item.names[params.locale] ?? item.names['uk'] ?? Object.values(item.names)[0] ?? '';
   const grandTotal = items.reduce((sum, item) => sum + getPrice(item) * item.quantity, 0);
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 

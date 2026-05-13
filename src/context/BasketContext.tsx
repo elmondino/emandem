@@ -4,16 +4,16 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 
 export interface BasketItem {
   id: number;
-  nameUK: string;
-  nameUS: string;
-  priceGBP: number;
-  priceUSD: number;
+  /** Display names keyed by region (e.g. 'uk', 'us', 'de'). Resolved at render from current locale. */
+  names: Record<string, string>;
+  /** Prices keyed by ISO currency code (e.g. 'GBP', 'USD', 'EUR'). Resolved at render from current locale. */
+  prices: Record<string, number>;
   quantity: number;
 }
 
 interface BasketContextValue {
   items: BasketItem[];
-  addToCart: (product: { id: number; nameUK: string; nameUS: string; priceGBP: number; priceUSD: number }) => void;
+  addToCart: (product: { id: number; names: Record<string, string>; prices: Record<string, number> }) => void;
   updateQuantity: (id: number, quantity: number) => void;
   removeFromCart: (id: number) => void;
   clearBasket: () => void;
@@ -36,10 +36,8 @@ export function BasketProvider({ children }: { children: ReactNode }) {
           ? parsed.filter(
               (item): item is BasketItem =>
                 typeof item?.id === 'number' &&
-                typeof item?.nameUK === 'string' &&
-                typeof item?.nameUS === 'string' &&
-                typeof item?.priceGBP === 'number' &&
-                typeof item?.priceUSD === 'number' &&
+                item?.names !== null && typeof item?.names === 'object' &&
+                item?.prices !== null && typeof item?.prices === 'object' &&
                 typeof item?.quantity === 'number'
             )
           : [];
@@ -54,7 +52,7 @@ export function BasketProvider({ children }: { children: ReactNode }) {
     if (hydrated) localStorage.setItem('basket', JSON.stringify(items));
   }, [items, hydrated]);
 
-  const addToCart = (product: { id: number; nameUK: string; nameUS: string; priceGBP: number; priceUSD: number }) => {
+  const addToCart = (product: { id: number; names: Record<string, string>; prices: Record<string, number> }) => {
     setItems(prev => {
       const existing = prev.find(item => item.id === product.id);
       if (existing) {

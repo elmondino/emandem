@@ -53,7 +53,11 @@ export default function StoreClient({ initialProducts, locale, localeKey }: Prop
     basketItems.find(i => i.id === productId)?.quantity ?? 0;
 
   const handleAddToCart = (product: Product) => {
-    addToCart({ id: product.id, nameUK: product.name.uk, nameUS: product.name.us, priceGBP: product.price.gbp, priceUSD: product.price.usd });
+    addToCart({
+      id: product.id,
+      names: Object.fromEntries(Object.entries(product.name) as [string, string][]),
+      prices: { GBP: product.price.gbp, USD: product.price.usd },
+    });
     if (addedTimerRef.current) clearTimeout(addedTimerRef.current);
     setAddedId(product.id);
     addedTimerRef.current = setTimeout(() => setAddedId(null), 1200);
