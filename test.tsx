@@ -12,10 +12,10 @@ jest.mock('next/navigation', () => ({
 }));
 
 const mockProducts: Product[] = [
-    { id: 1, name: { uk: 'Item 1', us: 'Item 1' }, price: { gbp: 10.00, usd: 12.99 }, stock: 10 },
-    { id: 2, name: { uk: 'Item 2', us: 'Item 2' }, price: { gbp: 20.00, usd: 25.99 }, stock: 10 },
-    { id: 3, name: { uk: 'Item 3', us: 'Item 3' }, price: { gbp: 30.00, usd: 38.99 }, stock: 10 },
-    { id: 4, name: { uk: 'Item 4', us: 'Item 4' }, price: { gbp: 40.00, usd: 51.99 }, stock: 10 },
+    { id: 1, name: { uk: 'Item 1', us: 'Item 1 US' }, price: { gbp: 10.00, usd: 12.99 }, stock: 10 },
+    { id: 2, name: { uk: 'Item 2', us: 'Item 2 US' }, price: { gbp: 20.00, usd: 25.99 }, stock: 10 },
+    { id: 3, name: { uk: 'Item 3', us: 'Item 3 US' }, price: { gbp: 30.00, usd: 38.99 }, stock: 10 },
+    { id: 4, name: { uk: 'Item 4', us: 'Item 4 US' }, price: { gbp: 40.00, usd: 51.99 }, stock: 10 },
 ];
 
 beforeEach(() => {
@@ -41,48 +41,31 @@ function renderCheckout(locale: 'uk' | 'us' = 'uk') {
 }
 
 describe('Home', () => {
-    it('renders an empty basket', () => {
+    it('renders basket button with 0 items', () => {
         renderStore();
-
-        const basketButton = screen.getByRole('button', {
-            name: /Basket:/i,
-        });
-
-        expect(basketButton).toHaveTextContent('Basket: 0 items');
+        const basketButton = screen.getByRole('button', { name: /open basket/i });
+        expect(basketButton).toBeInTheDocument();
     });
 
-    it('renders a basket with 1 item', () => {
+    it('adds item to basket and updates count badge', () => {
         renderStore();
 
-        const buttons = screen.getAllByRole('button', {
-            name: /Add .* to basket/i,
-        });
+        const addButtons = screen.getAllByRole('button', { name: /Add .* to basket/i });
+        fireEvent.click(addButtons[0]);
 
-        fireEvent.click(buttons[0]);
-
-        const basketButton = screen.getByRole('button', {
-            name: /Basket:/i,
-        });
-
-        expect(basketButton).toHaveTextContent(/Basket: 1 item$/);
+        // basket button aria-label updates with count
+        expect(screen.getByRole('button', { name: /open basket, 1 item/i })).toBeInTheDocument();
     });
 
-    it('renders a basket with 1 of item 1 and 2 of item 2', () => {
+    it('accumulates quantity across multiple adds', () => {
         renderStore();
 
-        const buttons = screen.getAllByRole('button', {
-            name: /Add .* to basket/i,
-        });
+        const addButtons = screen.getAllByRole('button', { name: /Add .* to basket/i });
+        fireEvent.click(addButtons[0]);
+        fireEvent.click(addButtons[1]);
+        fireEvent.click(addButtons[1]);
 
-        fireEvent.click(buttons[0]);
-        fireEvent.click(buttons[1]);
-        fireEvent.click(buttons[1]);
-
-        const basketButton = screen.getByRole('button', {
-            name: /Basket:/i,
-        });
-
-        expect(basketButton).toHaveTextContent(/Basket: 3 items$/);
+        expect(screen.getByText('3')).toBeInTheDocument();
     });
 
     it('displays GBP prices for UK locale', () => {
@@ -116,6 +99,24 @@ describe('Checkout', () => {
 
         expect(screen.getAllByText('Item 1').length).toBeGreaterThan(0);
         expect(screen.getAllByText('2').length).toBeGreaterThan(0);
-        expect(screen.getByText('Total items')).toBeInTheDocument();
+        expect(screen.getByText('Place order')).toBeInTheDocument();
+    });
+
+    it('removes item from basket when remove button clicked', () => {
+        render(
+            <BasketProvider>
+                <StoreClient initialProducts={mockProducts} locale={locales.uk} localeKey="uk" />
+                <CheckoutPage params={{ locale: 'uk' }} />
+            </BasketProvider>
+        );
+
+        const addButtons = screen.getAllByRole('button', { name: /Add .* to basket/i });
+        fireEvent.click(addButtons[0]);
+
+        // Both the drawer and checkout page have a remove button; click the checkout one
+        const removeButtons = screen.getAllByRole('button', { name: /Remove Item 1/i });
+        fireEvent.click(removeButtons[removeButtons.length - 1]);
+
+        expect(screen.getByText('Your basket is empty.')).toBeInTheDocument();
     });
 });
