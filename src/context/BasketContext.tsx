@@ -6,12 +6,13 @@ export interface BasketItem {
   id: number;
   name: string;
   price: number;
+  currency: 'GBP' | 'USD';
   quantity: number;
 }
 
 interface BasketContextValue {
   items: BasketItem[];
-  addToCart: (product: { id: number; name: string; price: number }) => void;
+  addToCart: (product: { id: number; name: string; price: number; currency: 'GBP' | 'USD' }) => void;
   updateQuantity: (id: number, quantity: number) => void;
   removeFromCart: (id: number) => void;
 }
@@ -21,7 +22,7 @@ const BasketContext = createContext<BasketContextValue | null>(null);
 export function BasketProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<BasketItem[]>([]);
 
-  const addToCart = (product: { id: number; name: string; price: number }) => {
+  const addToCart = (product: { id: number; name: string; price: number; currency: 'GBP' | 'USD' }) => {
     setItems(prev => {
       const existing = prev.find(item => item.id === product.id);
       if (existing) {
@@ -34,7 +35,11 @@ export function BasketProvider({ children }: { children: ReactNode }) {
   };
 
   const updateQuantity = (id: number, quantity: number) => {
-    if (quantity < 1) return;
+    if (quantity < 1) {
+      // decrement below 1 removes the item
+      setItems(prev => prev.filter(item => item.id !== id));
+      return;
+    }
     setItems(prev => prev.map(item => item.id === id ? { ...item, quantity } : item));
   };
 

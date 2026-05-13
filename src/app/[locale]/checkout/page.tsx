@@ -7,6 +7,11 @@ import { isValidLocale, locales, formatPrice } from '@/lib/locale';
 export default function CheckoutPage({ params }: { params: { locale: string } }) {
   const { items, updateQuantity, removeFromCart } = useBasket();
   const locale = isValidLocale(params.locale) ? locales[params.locale] : locales.uk;
+  // Per-item: use the currency the item was added in; grand total uses current locale
+  const fmtItem = (amount: number, currency: 'GBP' | 'USD') => {
+    const cfg = Object.values(locales).find(l => l.currency === currency) ?? locale;
+    return formatPrice(amount, cfg);
+  };
   const fmt = (amount: number) => formatPrice(amount, locale);
   const grandTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -51,7 +56,7 @@ export default function CheckoutPage({ params }: { params: { locale: string } })
                 <li key={item.id} className="px-6 py-4 flex items-center gap-4">
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-gray-900 truncate">{item.name}</p>
-                    <p className="text-sm text-gray-500">{fmt(item.price)} each</p>
+                    <p className="text-sm text-gray-500">{fmtItem(item.price, item.currency)} each</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -71,7 +76,7 @@ export default function CheckoutPage({ params }: { params: { locale: string } })
                     </button>
                   </div>
                   <div className="text-right min-w-20">
-                    <p className="font-semibold text-gray-900">{fmt(item.price * item.quantity)}</p>
+                    <p className="font-semibold text-gray-900">{fmtItem(item.price * item.quantity, item.currency)}</p>
                   </div>
                   <button
                     onClick={() => removeFromCart(item.id)}

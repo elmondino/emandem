@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useBasket } from '@/context/BasketContext';
 import { Product } from '@/lib/products';
 import { LocaleConfig, formatPrice, Region } from '@/lib/locale';
@@ -19,6 +19,12 @@ export default function StoreClient({ initialProducts, locale, localeKey }: Prop
   const [loadingMore, setLoadingMore] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [addedId, setAddedId] = useState<number | null>(null);
+  const addedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clean up the flash timer on unmount to prevent setState on unmounted component
+  useEffect(() => {
+    return () => { if (addedTimerRef.current) clearTimeout(addedTimerRef.current); };
+  }, []);
 
   useEffect(() => {
     fetch('/api/more-products')
@@ -45,9 +51,10 @@ export default function StoreClient({ initialProducts, locale, localeKey }: Prop
 
   const handleAddToCart = (product: Product) => {
     const { raw } = getProductPrice(product);
-    addToCart({ id: product.id, name: getProductName(product), price: raw });
+    addToCart({ id: product.id, name: getProductName(product), price: raw, currency: locale.currency });
+    if (addedTimerRef.current) clearTimeout(addedTimerRef.current);
     setAddedId(product.id);
-    setTimeout(() => setAddedId(null), 1200);
+    addedTimerRef.current = setTimeout(() => setAddedId(null), 1200);
   };
 
   return (
@@ -60,6 +67,21 @@ export default function StoreClient({ initialProducts, locale, localeKey }: Prop
           {locale.label === 'United Kingdom' ? '🇬🇧' : '🇺🇸'} {locale.label} Store
         </h1>
         <p className="text-gray-500 mb-8 text-sm">Click a product to add it to your basket.</p>
+
+        {products.length === 0 && !loadingMore && (
+          <div className="text-center py-20 text-gray-400">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto mb-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            </svg>
+            <p className="text-base text-gray-500">Unable to load products right now.</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-3 text-sm text-indigo-600 hover:underline"
+            >
+              Try again
+            </button>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {products.map(product => {
