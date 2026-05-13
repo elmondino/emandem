@@ -12,8 +12,8 @@ test('products load immediately without a full-page spinner', async ({ page }) =
   await page.goto('/uk');
   // At least one product card should be visible without waiting
   await expect(page.getByRole('button', { name: /add .+ to basket/i }).first()).toBeVisible();
-  // No full-page spinner (the only spinner is the "loading more" one at the bottom)
-  await expect(page.getByText('Loading more products...')).not.toBeVisible({ timeout: 500 });
+  // No loading spinner - products are SSR'd and available on first paint
+  await expect(page.getByText('Loading more products...')).not.toBeVisible();
 });
 
 // 2. UK locale shows GBP prices
