@@ -43,6 +43,8 @@ export default function StoreClient({ initialProducts, locale, localeKey }: Prop
   const getRawPrice = (product: Product) =>
     locale.currency === 'GBP' ? product.price.gbp : product.price.usd;
 
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+
   return (
     <main className={styles.main}>
       <div className={styles.description}>
@@ -52,10 +54,7 @@ export default function StoreClient({ initialProducts, locale, localeKey }: Prop
             className={styles.basket}
             onClick={() => router.push(`/${localeKey}/checkout`)}
           >
-            {(() => {
-              const total = items.reduce((sum, item) => sum + item.quantity, 0);
-              return `Basket: ${total} ${total === 1 ? 'item' : 'items'}`;
-            })()}
+            Basket: {totalItems} {totalItems === 1 ? 'item' : 'items'}
           </button>
           {items.map(item => (
             <div key={item.id}>{item.name} count: {item.quantity}</div>
