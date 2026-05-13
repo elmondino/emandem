@@ -58,7 +58,9 @@
   transition: transform 200ms;
 }
 
-.card h2 {
+.cardTitle {
+  display: block;
+  font-size: 1.05rem;
   font-weight: 600;
   margin-bottom: 0.7rem;
 }

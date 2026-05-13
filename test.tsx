@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BasketProvider } from '@/context/BasketContext';
 import StoreClient from '@/components/StoreClient';
+import CheckoutPage from '@/app/[locale]/checkout/page';
 import { locales } from '@/lib/locale';
 import { Product } from '@/lib/products';
 
@@ -23,10 +24,18 @@ beforeEach(() => {
     global.fetch = jest.fn().mockReturnValue(new Promise(() => {})) as jest.Mock;
 });
 
-function renderStore() {
+function renderStore(locale: 'uk' | 'us' = 'uk') {
     return render(
         <BasketProvider>
-            <StoreClient initialProducts={mockProducts} locale={locales.uk} localeKey="uk" />
+            <StoreClient initialProducts={mockProducts} locale={locales[locale]} localeKey={locale} />
+        </BasketProvider>
+    );
+}
+
+function renderCheckout(locale: 'uk' | 'us' = 'uk') {
+    return render(
+        <BasketProvider>
+            <CheckoutPage params={{ locale }} />
         </BasketProvider>
     );
 }
@@ -74,5 +83,39 @@ describe('Home', () => {
         });
 
         expect(basketButton).toHaveTextContent(/Basket: 3 items$/);
+    });
+
+    it('displays GBP prices for UK locale', () => {
+        renderStore('uk');
+        expect(screen.getByText('£10.00')).toBeInTheDocument();
+    });
+
+    it('displays USD prices for US locale', () => {
+        renderStore('us');
+        expect(screen.getByText('$12.99')).toBeInTheDocument();
+    });
+});
+
+describe('Checkout', () => {
+    it('shows empty basket message when no items added', () => {
+        renderCheckout();
+        expect(screen.getByText('Your basket is empty.')).toBeInTheDocument();
+    });
+
+    it('shows items and total after adding to basket', () => {
+        render(
+            <BasketProvider>
+                <StoreClient initialProducts={mockProducts} locale={locales.uk} localeKey="uk" />
+                <CheckoutPage params={{ locale: 'uk' }} />
+            </BasketProvider>
+        );
+
+        const addButtons = screen.getAllByRole('button', { name: /Add .* to basket/i });
+        fireEvent.click(addButtons[0]);
+        fireEvent.click(addButtons[0]);
+
+        expect(screen.getAllByText('Item 1').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('2').length).toBeGreaterThan(0);
+        expect(screen.getByText('Total items')).toBeInTheDocument();
     });
 });

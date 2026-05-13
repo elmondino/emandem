@@ -15,7 +15,12 @@ export default async function LocalePage({
   if (!isValidLocale(params.locale)) notFound();
 
   const locale = locales[params.locale];
-  const products = await getProducts();
+  let products: Awaited<ReturnType<typeof getProducts>> = [];
+  try {
+    products = await getProducts();
+  } catch {
+    // API unavailable - render with empty list rather than crashing
+  }
 
   return (
     <StoreClient

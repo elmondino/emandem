@@ -37,11 +37,8 @@ export default function StoreClient({ initialProducts, locale, localeKey }: Prop
 
   const getProductPrice = (product: Product) => {
     const amount = locale.currency === 'GBP' ? product.price.gbp : product.price.usd;
-    return formatPrice(amount, locale);
+    return { raw: amount, formatted: formatPrice(amount, locale) };
   };
-
-  const getRawPrice = (product: Product) =>
-    locale.currency === 'GBP' ? product.price.gbp : product.price.usd;
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -56,30 +53,30 @@ export default function StoreClient({ initialProducts, locale, localeKey }: Prop
           >
             Basket: {totalItems} {totalItems === 1 ? 'item' : 'items'}
           </button>
-          {items.map(item => (
-            <div key={item.id}>{item.name} count: {item.quantity}</div>
-          ))}
         </div>
       </div>
 
       <div className={styles.grid}>
-        {products.map(product => (
-          <button
-            key={product.id}
-            className={styles.card}
-            onClick={() =>
-              addToCart({
-                id: product.id,
-                name: getProductName(product),
-                price: getRawPrice(product),
-              })
-            }
-            aria-label={`Add ${getProductName(product)} to basket`}
-          >
-            <h2>{getProductName(product)} <span>-&gt;</span></h2>
-            <p>{getProductPrice(product)}</p>
-          </button>
-        ))}
+        {products.map(product => {
+          const { raw, formatted } = getProductPrice(product);
+          return (
+            <button
+              key={product.id}
+              className={styles.card}
+              onClick={() =>
+                addToCart({
+                  id: product.id,
+                  name: getProductName(product),
+                  price: raw,
+                })
+              }
+              aria-label={`Add ${getProductName(product)} to basket`}
+            >
+              <span className={styles.cardTitle}>{getProductName(product)} <span>-&gt;</span></span>
+              <p>{formatted}</p>
+            </button>
+          );
+        })}
       </div>
     </main>
   );
