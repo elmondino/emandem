@@ -47,8 +47,8 @@ export default function BasketDrawer({ open, onClose, locale, localeKey }: Props
       )}
 
       {/* Drawer panel */}
-      <aside
-        ref={drawerRef as React.RefObject<HTMLElement>}
+      <div
+        ref={drawerRef as React.RefObject<HTMLDivElement>}
         role="dialog"
         aria-label="Shopping basket"
         aria-modal="true"
@@ -137,7 +137,7 @@ export default function BasketDrawer({ open, onClose, locale, localeKey }: Props
             </button>
           </div>
         )}
-      </aside>
+      </div>
     </>
   );
 }

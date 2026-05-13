@@ -22,18 +22,23 @@ export default function Navbar({ localeKey, onBasketClick }: Props) {
 
         <div className="flex items-center gap-3">
           {/* Locale toggle pill */}
-          <div className="flex items-center bg-gray-100 rounded-full p-1 gap-1" role="group" aria-label="Select region">
+          <div className="flex items-center bg-gray-100 rounded-full p-1 gap-1" role="tablist" aria-label="Select region">
             {(['uk', 'us'] as Region[]).map(loc => (
               <Link
                 key={loc}
                 href={`/${loc}`}
+                role="tab"
+                aria-selected={localeKey === loc}
+                aria-label={
+                  localeKey === loc
+                    ? `${locales[loc].label} (current)`
+                    : `Switch to ${locales[loc].label}`
+                }
                 className={`text-sm font-medium px-3 py-1 rounded-full transition-colors ${
                   localeKey === loc
                     ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-500 hover:text-gray-800'
                 }`}
-                aria-current={localeKey === loc ? 'page' : undefined}
-                aria-label={`Switch to ${locales[loc].label}`}
               >
                 {loc === 'uk' ? '🇬🇧 UK' : '🇺🇸 US'}
               </Link>
