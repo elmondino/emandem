@@ -46,7 +46,7 @@ describe('Home', () => {
         renderStore();
 
         const buttons = screen.getAllByRole('button', {
-            name: /Add to basket/i,
+            name: /Add .* to basket/i,
         });
 
         fireEvent.click(buttons[0]);
@@ -62,7 +62,7 @@ describe('Home', () => {
         renderStore();
 
         const buttons = screen.getAllByRole('button', {
-            name: /Add to basket/i,
+            name: /Add .* to basket/i,
         });
 
         fireEvent.click(buttons[0]);

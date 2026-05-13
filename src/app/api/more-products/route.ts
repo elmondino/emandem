@@ -1,14 +1,11 @@
 import { NextResponse } from 'next/server';
+import { getMoreProducts } from '@/lib/products';
 
 export async function GET() {
-  const res = await fetch('https://v0-api-endpoint-request.vercel.app/api/more-products', {
-    cache: 'no-store',
-  });
-
-  if (!res.ok) {
-    return NextResponse.json({ success: false, products: [] }, { status: res.status });
+  try {
+    const products = await getMoreProducts();
+    return NextResponse.json({ success: true, products });
+  } catch {
+    return NextResponse.json({ success: false, products: [] }, { status: 500 });
   }
-
-  const data = await res.json();
-  return NextResponse.json(data);
 }

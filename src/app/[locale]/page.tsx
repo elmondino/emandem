@@ -3,6 +3,10 @@ import { isValidLocale, locales } from '@/lib/locale';
 import { getProducts } from '@/lib/products';
 import StoreClient from '@/components/StoreClient';
 
+export function generateStaticParams() {
+  return Object.keys(locales).map(locale => ({ locale }));
+}
+
 export default async function LocalePage({
   params,
 }: {

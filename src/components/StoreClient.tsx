@@ -74,7 +74,7 @@ export default function StoreClient({ initialProducts, locale, localeKey }: Prop
                 price: getRawPrice(product),
               })
             }
-            aria-label="Add to basket"
+            aria-label={`Add ${getProductName(product)} to basket`}
           >
             <h2>{getProductName(product)} <span>-&gt;</span></h2>
             <p>{getProductPrice(product)}</p>

@@ -22,6 +22,8 @@ export default function CheckoutPage({ params }: { params: { locale: string } })
               <tr>
                 <th>Item</th>
                 <th>Quantity</th>
+                <th>Price each</th>
+                <th>Subtotal</th>
               </tr>
             </thead>
             <tbody>
@@ -29,6 +31,8 @@ export default function CheckoutPage({ params }: { params: { locale: string } })
                 <tr key={item.id}>
                   <td>{item.name}</td>
                   <td>{item.quantity}</td>
+                  <td>{item.price.toFixed(2)}</td>
+                  <td>{(item.price * item.quantity).toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>
@@ -36,6 +40,8 @@ export default function CheckoutPage({ params }: { params: { locale: string } })
               <tr>
                 <td><strong>Total items</strong></td>
                 <td><strong>{totalItems}</strong></td>
+                <td></td>
+                <td><strong>{items.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}</strong></td>
               </tr>
             </tfoot>
           </table>
