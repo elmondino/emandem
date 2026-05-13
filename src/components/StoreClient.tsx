@@ -5,18 +5,19 @@ import { useRouter } from 'next/navigation';
 import styles from '@/app/page.module.css';
 import { useBasket } from '@/context/BasketContext';
 import { Product } from '@/lib/products';
-import { LocaleConfig, formatPrice } from '@/lib/locale';
+import { LocaleConfig, formatPrice, Region } from '@/lib/locale';
 
 interface Props {
   initialProducts: Product[];
   locale: LocaleConfig;
-  localeKey: string;
+  localeKey: Region;
 }
 
 export default function StoreClient({ initialProducts, locale, localeKey }: Props) {
   const router = useRouter();
   const { items, addToCart } = useBasket();
   const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [loadingMore, setLoadingMore] = useState(true);
 
   useEffect(() => {
     fetch('/api/more-products')
@@ -30,7 +31,8 @@ export default function StoreClient({ initialProducts, locale, localeKey }: Prop
           });
         }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setLoadingMore(false));
   }, []);
 
   const getProductName = (product: Product) => product.name[locale.region];
@@ -78,6 +80,7 @@ export default function StoreClient({ initialProducts, locale, localeKey }: Prop
           );
         })}
       </div>
+      {loadingMore && <p className={styles.loadingMore}>Loading more products...</p>}
     </main>
   );
 }

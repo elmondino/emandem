@@ -1,5 +1,5 @@
-import { notFound } from 'next/navigation';
-import { isValidLocale, locales } from '@/lib/locale';
+import { locales } from '@/lib/locale';
+import type { Region } from '@/lib/locale';
 import { getProducts } from '@/lib/products';
 import StoreClient from '@/components/StoreClient';
 
@@ -12,8 +12,7 @@ export default async function LocalePage({
 }: {
   params: { locale: string };
 }) {
-  if (!isValidLocale(params.locale)) notFound();
-
+  // Locale validation is handled by [locale]/layout.tsx before this page renders
   const locale = locales[params.locale];
   let products: Awaited<ReturnType<typeof getProducts>> = [];
   try {
@@ -26,7 +25,7 @@ export default async function LocalePage({
     <StoreClient
       initialProducts={products}
       locale={locale}
-      localeKey={params.locale}
+      localeKey={params.locale as Region}
     />
   );
 }

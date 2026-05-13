@@ -1,7 +1,8 @@
 import { BasketProvider } from '@/context/BasketContext';
-import { isValidLocale } from '@/lib/locale';
+import { isValidLocale, locales } from '@/lib/locale';
 import { notFound } from 'next/navigation';
 import { ReactNode } from 'react';
+import { LocaleHtmlLang } from '@/components/LocaleHtmlLang';
 
 export default function LocaleLayout({
   children,
@@ -14,5 +15,10 @@ export default function LocaleLayout({
     notFound();
   }
 
-  return <BasketProvider>{children}</BasketProvider>;
+  return (
+    <BasketProvider>
+      <LocaleHtmlLang lang={locales[params.locale].currencyLocale} />
+      {children}
+    </BasketProvider>
+  );
 }

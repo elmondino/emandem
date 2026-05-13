@@ -25,5 +25,5 @@ export async function getMoreProducts(): Promise<Product[]> {
   });
   if (!res.ok) return [];
   const data: ProductsResponse = await res.json();
-  return data.products;
+  return data.products ?? [];
 }

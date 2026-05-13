@@ -110,8 +110,9 @@
     padding: 1rem 2.5rem;
   }
 
-  .card h2 {
-    margin-bottom: 0.5rem;
+  /* basket overrides pointer-events: none from .description div */
+  .basket {
+    pointer-events: auto;
   }
 
   .description {
@@ -166,4 +167,12 @@
   .grid {
     grid-template-columns: repeat(2, minmax(25%, auto));
   }
+}
+
+.loadingMore {
+  text-align: center;
+  opacity: 0.5;
+  font-size: 0.9rem;
+  padding: 1rem;
+  width: 100%;
 }
